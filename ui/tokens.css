@@ -1,0 +1,65 @@
+/* Canonical tokens. docs/design.md mirrors this block. The daemon reads --d-* from here. */
+
+:root {
+  /* surfaces */
+  --canvas:        #0A0C0E;
+  --surface:       #14181C;
+  --surface-raised:#1B2126;
+  --border:        #242B31;
+  --border-strong: #38424A;
+
+  /* text */
+  --text:          #E6EAED;
+  --text-dim:      #98A3AC;
+  --text-faint:    #5E6970;
+
+  /* state */
+  --idle:          #4A555D;
+  --active:        #6BA8FF;   /* currently executing */
+  --pass:          #45D48A;
+  --pending:       #F5A524;
+  --fail:          #F4593C;
+
+  /* type */
+  --ui:   "Instrument Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* scale */
+  --t-micro: 10px;   /* section labels, uppercase, --tracking */
+  --t-small: 12px;   /* node sublabels, metadata, readouts */
+  --t-body:  14px;   /* node labels, ledger rows */
+  --t-read:  17px;   /* the question, the transcript */
+  --tracking: 0.14em;
+  --leading-read: 1.5;
+
+  /* rhythm */
+  --gap:   8px;
+  --pad:   16px;
+  --radius: 4px;     /* everything. no pills, no 16px cards */
+
+  /* layout */
+  --pane-left:   1180px;
+  --pane-right:  740px;
+  --node-w:      184px;  /* uniform card width; six columns fit --pane-left with --gap gutters */
+  --readout-gap: 6px;    /* card bottom to readout caption */
+  --port:        3px;
+  --glyph:       12px;   /* concept row mark */
+  --meter-w:     24px;
+  --meter-bar:   2px;
+  --hairline:    1px;
+  --nudge:       4px;    /* the most anything may translate */
+  --dash:        2 3;    /* blast-radius edge dash pattern */
+  --tint:        15%;    /* diff row background */
+
+  /* motion */
+  --d-fast:    140ms;
+  --d-base:    260ms;
+  --d-edge:    420ms;   /* an edge drawing */
+  --d-hold:    900ms;   /* a node holding before the next edge */
+  --d-decide:  1600ms;  /* the risk node deciding */
+  --d-concept: 700ms;   /* between concept rows */
+  --d-detail:  200ms;   /* mark to detail line */
+  --d-ledger:  1200ms;  /* new ledger row border settling */
+  --d-silence: 1500ms;  /* silence before the transcript locks */
+  --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
+}
