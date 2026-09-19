@@ -63,13 +63,15 @@ Which paths are risk-bearing is decided by this rule table. First match wins.
   "services/payments/**":      "risk-bearing",
   "services/admin/**":         "risk-bearing",
   "services/notifications/**": "low-stakes",
-  "infra/**":                  "low-stakes"
+  "infra/**":                  "low-stakes",
+  "**":                        "low-stakes"
 }
 ```
 
 Risk-bearing paths continue past `risk` to `gate`. Low-stakes paths take the skip path to
-`ledger`. There is no catch-all row: every file in `sample-repo/` that the demo can touch is
-covered, and unused rules rot.
+`ledger`. The final `**` row is the catch-all: an edit to any file not named above still
+travels to `risk`, terminates there as low-stakes, and produces a skip. Nothing the watcher
+sees is ever silent.
 
 This classification is genuinely computed from the changed path at runtime. It is the one
 piece of real product logic in the demo, and it is deliberately deterministic: no model
