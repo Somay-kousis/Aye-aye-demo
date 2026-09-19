@@ -37,6 +37,11 @@
   --pad:   16px;
   --radius: 4px;     /* everything. no pills, no 16px cards */
 
+  /* stage: the authored frame. app.js reads these to fit the viewport. */
+  --stage-w:     1920px;
+  --stage-h:     1080px;
+  --stage-scale: 1;      /* set by app.js on load and resize */
+
   /* layout */
   --pane-left:   1180px;
   --pane-right:  740px;
