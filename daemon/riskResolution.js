@@ -7,6 +7,7 @@ export const RULES = [
   ['services/admin/**', 'risk-bearing'],
   ['services/notifications/**', 'low-stakes'],
   ['infra/**', 'low-stakes'],
+  ['**', 'low-stakes'], // catch-all: an unmapped file still resolves at risk and is skipped, never ignored
 ];
 
 // Enough glob for the rule table: `**` spans directories, `*` stays within one segment.
