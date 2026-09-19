@@ -1,0 +1,13 @@
+{
+  "name": "aye-aye-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node daemon/index.js",
+    "tail": "node scripts/tail.js",
+    "reset-sample": "sh scripts/reset-sample.sh"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
