@@ -1,0 +1,229 @@
+/* The architecture graph. Cards, readouts and dependent slots are DOM; edges, ports and
+   arrowheads are one SVG over the pane. Every transition here is triggered by an event. */
+
+#graph {
+  position: absolute;
+  inset: 0;
+}
+
+/* node card */
+
+.node {
+  position: absolute;
+  width: var(--node-w);
+  box-sizing: border-box;
+  padding: var(--pad);
+  background: var(--surface);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease);
+  transition-delay: var(--after-edge, 0ms);
+}
+
+.node .label {
+  display: block;
+  font-family: var(--ui);
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: color var(--d-fast) var(--ease);
+  transition-delay: var(--after-edge, 0ms);
+}
+
+.node .sublabel {
+  display: block;
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  color: var(--text-faint);
+}
+
+.node[data-state="active"] {
+  border-color: var(--active);
+  box-shadow: inset 0 0 0 var(--hairline) var(--active);
+}
+
+.node[data-state="active"] .label,
+.node[data-state="visited"] .label,
+.node[data-resolved] .label {
+  color: var(--text);
+}
+
+.node[data-state="visited"] {
+  border-color: var(--visited);
+}
+
+/* resolved overrides active and visited */
+.node[data-resolved="pass"]    { border-color: var(--pass);    box-shadow: none; }
+.node[data-resolved="pending"] { border-color: var(--pending); box-shadow: none; }
+.node[data-resolved="fail"]    { border-color: var(--fail);    box-shadow: none; }
+
+/* readout: the caption beneath risk and gate, outside the card */
+
+.readout {
+  position: absolute;
+  padding-top: var(--readout-gap);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--d-fast) var(--ease);
+  transition-delay: var(--after-edge, 0ms);
+}
+
+.readout.shown { opacity: 1; }
+.readout[data-state="pass"]    { color: var(--pass); }
+.readout[data-state="pending"] { color: var(--pending); }
+.readout[data-state="fail"]    { color: var(--fail); }
+
+/* dependents band: three slots, empty ones render nothing */
+
+.dependent {
+  position: absolute;
+  width: var(--node-w);
+  box-sizing: border-box;
+  padding: var(--gap) 0 0 var(--pad);
+  opacity: 0;
+  transition: opacity var(--d-fast) var(--ease);
+  transition-delay: var(--after-edge, 0ms);
+}
+
+.dependent.shown { opacity: 1; }
+
+.dependent .dep-label {
+  display: block;
+  font-family: var(--ui);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+.dependent .dep-path {
+  display: block;
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  color: var(--text-faint);
+}
+
+/* the reset between beats fades everything back over --d-base instead of --d-fast */
+
+#graph.resetting .node,
+#graph.resetting .node .label,
+#graph.resetting .readout,
+#graph.resetting .dependent {
+  transition-duration: var(--d-base);
+  transition-delay: 0ms;
+}
+
+/* edges */
+
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.edge .base {
+  fill: none;
+  stroke: var(--idle);
+  stroke-width: var(--hairline);
+}
+
+/* The fire path draws source to target with stroke-dashoffset (pathLength is 1). Dormant
+   it is invisible; a reset fades it over --d-base and only then snaps the offset back, so
+   nothing is seen retracting. */
+.edge .fire {
+  fill: none;
+  stroke: var(--active);
+  stroke-width: var(--hairline);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease),
+              stroke var(--d-base) var(--ease),
+              stroke-dashoffset 0ms linear var(--d-base);
+}
+
+.edge.fired .fire {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--d-edge) var(--ease),
+              stroke var(--d-base) var(--ease),
+              opacity 0ms;
+}
+
+/* rearm: snap back to dormant with no transition so a re-fire draws again */
+.edge.rearm .fire,
+.edge.rearm .reveal {
+  transition: none;
+  opacity: 0;
+  stroke-dashoffset: 1;
+}
+
+.edge .port,
+.edge .arrow {
+  fill: var(--border-strong);
+  transition: fill var(--d-base) var(--ease);
+}
+
+/* the target end fills when the line arrives */
+.edge.fired .to {
+  transition-delay: var(--d-edge);
+}
+
+.edge.fired .port,
+.edge.fired .arrow {
+  fill: var(--active);
+}
+
+.edge.fired[data-settle="visited"] .fire   { stroke: var(--visited); }
+.edge.fired[data-settle="pass"]    .fire   { stroke: var(--pass); }
+.edge.fired[data-settle="pending"] .fire   { stroke: var(--pending); }
+.edge.fired[data-settle="fail"]    .fire   { stroke: var(--fail); }
+
+.edge.fired[data-settle="visited"] .port, .edge.fired[data-settle="visited"] .arrow { fill: var(--visited); }
+.edge.fired[data-settle="pass"]    .port, .edge.fired[data-settle="pass"]    .arrow { fill: var(--pass); }
+.edge.fired[data-settle="pending"] .port, .edge.fired[data-settle="pending"] .arrow { fill: var(--pending); }
+.edge.fired[data-settle="fail"]    .port, .edge.fired[data-settle="fail"]    .arrow { fill: var(--fail); }
+
+/* blast-radius edges: dashed, --text-faint, no dormant line, no settle, no arrowhead, and
+   no ports until fired, so an empty slot renders nothing.
+   A dashed stroke cannot also draw itself with dashoffset, so it is revealed through an
+   alpha mask whose solid path does the drawing. */
+.dep-edge .port {
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease);
+}
+
+.dep-edge.fired .port {
+  opacity: 1;
+  fill: var(--text-faint);
+}
+
+.dep-edge .fire {
+  stroke: var(--text-faint);
+  stroke-dasharray: var(--dash);
+  stroke-dashoffset: 0;
+  transition: opacity var(--d-base) var(--ease);
+}
+
+.dep-edge.fired .fire {
+  transition: opacity 0ms;
+}
+
+.dep-edge .reveal {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: calc(var(--hairline) * 4);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0ms linear var(--d-base);
+}
+
+.dep-edge.fired .reveal {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--d-edge) var(--ease);
+}

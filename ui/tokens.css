@@ -16,6 +16,7 @@
   /* state */
   --idle:          #4A555D;
   --active:        #6BA8FF;   /* currently executing */
+  --visited:       #38424A;   /* traversed and moved on from; resolved colours override it */
   --pass:          #45D48A;
   --pending:       #F5A524;
   --fail:          #F4593C;
