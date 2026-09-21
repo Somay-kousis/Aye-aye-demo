@@ -101,8 +101,9 @@ The changed symbol is detected from the diff: the daemon looks for a map key who
 matches the changed file and whose symbol name appears in a changed line.
 
 These render as three thin secondary edges fanning out from the `graph` node, appearing one
-at a time. The third one, the cache, is the one the engineer misses. Give it the same visual
-weight as the others so the miss is not telegraphed.
+at a time, each landing in one of three reserved slots in a band along the bottom of the
+architecture pane (empty slots render nothing). The third one, the cache, is the one the
+engineer misses. Give it the same visual weight as the others so the miss is not telegraphed.
 
 ## Traversal animation
 

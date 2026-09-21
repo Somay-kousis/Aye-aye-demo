@@ -37,7 +37,9 @@ Do not invent content that these files specify.
 ```
 npm install
 npm run dev               # starts the daemon on :4317 and serves the UI on :4316
-npm run dev -- --replay   # replays a recorded event sequence instead of watching files
+npm run dev -- --replay   # replays a recorded event sequence instead of watching files;
+                          #   open the UI and press Space to start it
+npm run stills            # captures docs/stills/ from a replay and checks the graph geometry
 npm run tail              # prints every daemon event with a timestamp (second terminal)
 npm run reset-sample      # restores sample-repo/ to its committed state between takes
 ```

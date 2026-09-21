@@ -251,8 +251,8 @@ is 15s, beat 6 holds 8s. Do not pad. Dead air reads as the product being slow.
 
 ## Replay mode
 
-`npm run dev -- --replay` emits this exact sequence from a fixture without watching files,
-so a clean take is always available if something breaks before a call. Replay is the
+`npm run dev -- --replay` emits this exact sequence from a fixture without watching files
+(open the UI, press Space to start), so a clean take is always available if something breaks before a call. Replay is the
 fallback for calls, not the way the hero take gets recorded: the point of the demo is the
 agent choosing something consequential without being told to, so the recorded take uses the
 real watcher and the vague instruction.

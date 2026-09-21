@@ -31,6 +31,7 @@ values from `ui/tokens.css` at startup to pace its event sequence.
   /* state */
   --idle:          #4A555D;
   --active:        #6BA8FF;   /* currently executing */
+  --visited:       #38424A;   /* traversed and moved on from; resolved colours override it */
   --pass:          #45D48A;
   --pending:       #F5A524;
   --fail:          #F4593C;
@@ -117,13 +118,25 @@ makes it visible before a take starts that the gesture happened. `CHECK · ARMED
 - background `--surface`, border 1px `--border`, radius `--radius`
 - `--node-w` wide, uniform, height by content, `--pad` inside
 - idle: border `--border`, text `--text-dim`
-- active: border `--active`, a 1px inner ring, label goes `--text`
-- resolved pass: border `--pass`. pending: `--pending`. fail: `--fail`
+- active: border `--active`, a 1px inner ring, label goes `--text`. Only the node currently
+  executing is `--active`.
+- visited (traversed and moved on from): border `--visited`, label `--text`, sublabel
+  `--text-faint`
+- resolved pass: border `--pass`. pending: `--pending`. fail: `--fail`. A resolved node keeps
+  its resolved colour; it overrides visited.
 - **no shadow, no glow, no scale transform.** State is carried by border and text colour
   only. A node that pulses is a node that looks like a toy.
 
 Ports are `--port` squares on the card edge in `--border-strong`, filled with the edge colour
-once that edge has fired.
+once that edge has fired. Left and right ports sit at mid-height. Top and bottom ports sit
+`--gap` in from the card's left edge, so a vertical edge runs clear of the readout beneath the
+card above it.
+
+Node positions are data: `ui/graph/nodes.js` gives each node a column and a row,
+`ui/graph/layout.js` turns those into pixels. Six columns at `--node-w` with `--gap` gutters
+fill `--pane-left`, so edges between adjacent columns are short stubs and edges within a
+column are vertical drops; the two long edges (`risk → ledger`, `judge → question`) are routed
+below and above the rows with a lead and a control-point offset held in `ui/graph/edges.js`.
 
 **Readout.** `risk` and `gate` show their computed line as a caption directly beneath the
 card, outside it, `--readout-gap` below the border, `--t-small` `--mono`, in the node's
@@ -136,8 +149,15 @@ Bezier, `--hairline`, `--idle` when dormant. When an edge fires it draws from so
 `--d-edge` using `stroke-dashoffset`, in `--active`, then settles to the resolved colour of
 its target node.
 
+Each flow edge carries a small arrowhead at its target port, `--border-strong` when dormant
+and following the edge colour once fired, so direction reads in a still as well as in
+motion.
+
 Blast-radius edges are the same but dashed `--dash` and `--text-faint`, and they do not
-settle to a state colour. They are context, not flow.
+settle to a state colour, and they carry no arrowhead. They are context, not flow. They run
+from the `graph` node to a reserved band along the bottom of the architecture pane with
+three slots; a slot renders nothing until its dependent arrives, then shows the dependent's
+label in `--t-small` `--ui` `--text-dim` over its path in `--t-small` `--mono` `--text-faint`.
 
 ## Right pane
 
