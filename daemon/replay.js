@@ -4,9 +4,12 @@ import { lineDiff } from './snapshot.js';
 // Plays fixtures/run.json through the same sequencer the watcher feeds, without touching
 // files. Steps: `change` (before/after text of one file), `answer`, `advance`. Without
 // --auto, answers and advances are left to the presenter, so the take still has a real
-// voice in it; with --auto the fixture supplies them and the run is hands-off.
-export async function replay(fixturePath, sequencer, { auto, log }) {
+// voice in it; with --auto the fixture supplies them and the run is hands-off. Nothing is
+// emitted until `started` resolves (Space in the UI), so the first beat is on screen.
+export async function replay(fixturePath, sequencer, { auto, log, started }) {
   const steps = JSON.parse(readFileSync(fixturePath, 'utf8'));
+  await started;
+  log({ type: 'replay', step: 'start' });
   for (const step of steps) {
     if (step.type === 'change') {
       log({ type: 'replay', step: `change ${step.path}` });

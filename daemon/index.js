@@ -19,11 +19,17 @@ const auto = args.has('--auto');
 const durations = readDurations(join(ROOT, 'ui', 'tokens.css'));
 const log = (event) => console.log(`${String(event.t ?? '').padStart(6)}  ${event.type.padEnd(10)} ${summary(event)}`);
 
+// Replay does not start at boot: the UI is served by this process, so nobody is watching
+// yet. It waits for Space from a connected UI, which is also the presenter's cue.
+let startReplay = () => {};
+const started = new Promise((resolve) => { startReplay = resolve; });
+
 const socket = startSocket(WS_PORT, {
   mode,
   onMessage(msg) {
     if (msg.type === 'answer') sequencer.onAnswer(msg.transcript ?? '');
     else if (msg.type === 'advance') sequencer.onAdvance();
+    else if (msg.type === 'key' && msg.key === ' ') startReplay();
     else if (msg.type === 'reset') {
       sequencer.reset();
       if (mode === 'watch') snapshot.reload();
@@ -42,8 +48,8 @@ if (mode === 'watch') {
   });
   console.log(`watching sample-repo/ (${snapshot.files.size} files) · ws :${WS_PORT} · ui :${UI_PORT}`);
 } else {
-  console.log(`replay${auto ? ' --auto' : ''} · ws :${WS_PORT} · ui :${UI_PORT}`);
-  replay(join(ROOT, 'fixtures', 'run.json'), sequencer, { auto, log });
+  console.log(`replay${auto ? ' --auto' : ''} · ws :${WS_PORT} · ui :${UI_PORT} · waiting for Space in the UI`);
+  replay(join(ROOT, 'fixtures', 'run.json'), sequencer, { auto, log, started });
 }
 
 function summary(e) {
