@@ -1,0 +1,801 @@
+{
+  "events": [
+    {
+      "type": "change",
+      "path": "services/notifications/templates.py",
+      "stakes": "low-stakes",
+      "symbol": null,
+      "diff": {
+        "removed": [
+          "Someone asked to reset the password on your account. If that was you, click here",
+          "click here: {activity_url}"
+        ],
+        "added": [
+          "Someone asked to reset the password on your account. If that was you, tap here",
+          "tap here: {activity_url}"
+        ],
+        "line": 5
+      }
+    },
+    {
+      "type": "node",
+      "id": "session"
+    },
+    {
+      "type": "node",
+      "id": "intake"
+    },
+    {
+      "type": "node",
+      "id": "parse"
+    },
+    {
+      "type": "node",
+      "id": "graph"
+    },
+    {
+      "type": "node",
+      "id": "risk"
+    },
+    {
+      "type": "resolve",
+      "id": "risk",
+      "state": "pass",
+      "readout": "notifications · 0 dependents"
+    },
+    {
+      "type": "node",
+      "id": "ledger"
+    },
+    {
+      "type": "resolve",
+      "id": "ledger",
+      "state": "pass"
+    },
+    {
+      "type": "skip",
+      "lines": [
+        "NO CHECK REQUIRED",
+        "services/notifications/templates.py",
+        "Copy change. No auth, payments or data path touched.",
+        "Recorded. Nobody interrupted."
+      ]
+    },
+    {
+      "type": "change",
+      "path": "services/auth/session.py",
+      "stakes": "risk-bearing",
+      "symbol": "SESSION_TTL",
+      "diff": {
+        "removed": [
+          "SESSION_TTL = timedelta(minutes=30)"
+        ],
+        "added": [
+          "SESSION_TTL = timedelta(days=7)"
+        ],
+        "line": 7
+      }
+    },
+    {
+      "type": "node",
+      "id": "session"
+    },
+    {
+      "type": "node",
+      "id": "intake"
+    },
+    {
+      "type": "node",
+      "id": "parse"
+    },
+    {
+      "type": "node",
+      "id": "graph"
+    },
+    {
+      "type": "dependent",
+      "index": 1,
+      "path": "services/auth/refresh.py",
+      "label": "refresh rotation"
+    },
+    {
+      "type": "dependent",
+      "index": 2,
+      "path": "services/admin/console.py",
+      "label": "admin console"
+    },
+    {
+      "type": "dependent",
+      "index": 3,
+      "path": "infra/cache/session_cache.py",
+      "label": "session cache"
+    },
+    {
+      "type": "node",
+      "id": "risk"
+    },
+    {
+      "type": "resolve",
+      "id": "risk",
+      "state": "pending",
+      "readout": "auth · session lifetime · 3 dependents"
+    },
+    {
+      "type": "node",
+      "id": "gate"
+    },
+    {
+      "type": "resolve",
+      "id": "gate",
+      "state": "pending",
+      "readout": "blast radius 3 → depth 3",
+      "depth": 3
+    },
+    {
+      "type": "check",
+      "lines": [
+        "COMPREHENSION CHECK",
+        "services/auth/session.py · SESSION_TTL",
+        "Touches: refresh rotation, admin console, session cache",
+        "Assigned to: Somay Kousis"
+      ]
+    },
+    {
+      "type": "node",
+      "id": "question"
+    },
+    {
+      "type": "question",
+      "attempt": 1,
+      "text": "You changed how long a session stays valid, from thirty minutes to seven days. Walk me through what that does to a token that was already stolen, and when a session you revoke actually stops working."
+    },
+    {
+      "type": "node",
+      "id": "human"
+    }
+  ],
+  "states": {
+    "01-rest": {
+      "current": null,
+      "nodes": {
+        "session": {
+          "state": "idle",
+          "resolved": null
+        },
+        "intake": {
+          "state": "idle",
+          "resolved": null
+        },
+        "parse": {
+          "state": "idle",
+          "resolved": null
+        },
+        "graph": {
+          "state": "idle",
+          "resolved": null
+        },
+        "risk": {
+          "state": "idle",
+          "resolved": null
+        },
+        "gate": {
+          "state": "idle",
+          "resolved": null
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": false,
+          "settle": null
+        },
+        "intake>parse": {
+          "fired": false,
+          "settle": null
+        },
+        "parse>graph": {
+          "fired": false,
+          "settle": null
+        },
+        "graph>risk": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>gate": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        false,
+        false,
+        false
+      ],
+      "readouts": {
+        "risk": null,
+        "gate": null
+      },
+      "slots": [
+        null,
+        null,
+        null
+      ]
+    },
+    "02-mid-traversal": {
+      "current": "parse",
+      "nodes": {
+        "session": {
+          "state": "visited",
+          "resolved": null
+        },
+        "intake": {
+          "state": "visited",
+          "resolved": null
+        },
+        "parse": {
+          "state": "active",
+          "resolved": null
+        },
+        "graph": {
+          "state": "idle",
+          "resolved": null
+        },
+        "risk": {
+          "state": "idle",
+          "resolved": null
+        },
+        "gate": {
+          "state": "idle",
+          "resolved": null
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "intake>parse": {
+          "fired": true,
+          "settle": null
+        },
+        "parse>graph": {
+          "fired": false,
+          "settle": null
+        },
+        "graph>risk": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>gate": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        false,
+        false,
+        false
+      ],
+      "readouts": {
+        "risk": null,
+        "gate": null
+      },
+      "slots": [
+        null,
+        null,
+        null
+      ]
+    },
+    "03-risk-green": {
+      "current": "risk",
+      "nodes": {
+        "session": {
+          "state": "visited",
+          "resolved": null
+        },
+        "intake": {
+          "state": "visited",
+          "resolved": null
+        },
+        "parse": {
+          "state": "visited",
+          "resolved": null
+        },
+        "graph": {
+          "state": "visited",
+          "resolved": null
+        },
+        "risk": {
+          "state": "active",
+          "resolved": "pass"
+        },
+        "gate": {
+          "state": "idle",
+          "resolved": null
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "intake>parse": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "parse>graph": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "graph>risk": {
+          "fired": true,
+          "settle": "pass"
+        },
+        "risk>gate": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        false,
+        false,
+        false
+      ],
+      "readouts": {
+        "risk": {
+          "text": "notifications · 0 dependents",
+          "state": "pass"
+        },
+        "gate": null
+      },
+      "slots": [
+        null,
+        null,
+        null
+      ]
+    },
+    "04-dependents": {
+      "current": "graph",
+      "nodes": {
+        "session": {
+          "state": "visited",
+          "resolved": null
+        },
+        "intake": {
+          "state": "visited",
+          "resolved": null
+        },
+        "parse": {
+          "state": "visited",
+          "resolved": null
+        },
+        "graph": {
+          "state": "active",
+          "resolved": null
+        },
+        "risk": {
+          "state": "idle",
+          "resolved": null
+        },
+        "gate": {
+          "state": "idle",
+          "resolved": null
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "intake>parse": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "parse>graph": {
+          "fired": true,
+          "settle": null
+        },
+        "graph>risk": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>gate": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        true,
+        true,
+        true
+      ],
+      "readouts": {
+        "risk": null,
+        "gate": null
+      },
+      "slots": [
+        "refresh rotation services/auth/refresh.py",
+        "admin console services/admin/console.py",
+        "session cache infra/cache/session_cache.py"
+      ]
+    },
+    "05-risk-amber": {
+      "current": "risk",
+      "nodes": {
+        "session": {
+          "state": "visited",
+          "resolved": null
+        },
+        "intake": {
+          "state": "visited",
+          "resolved": null
+        },
+        "parse": {
+          "state": "visited",
+          "resolved": null
+        },
+        "graph": {
+          "state": "visited",
+          "resolved": null
+        },
+        "risk": {
+          "state": "active",
+          "resolved": "pending"
+        },
+        "gate": {
+          "state": "idle",
+          "resolved": null
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "intake>parse": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "parse>graph": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "graph>risk": {
+          "fired": true,
+          "settle": "pending"
+        },
+        "risk>gate": {
+          "fired": false,
+          "settle": null
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        true,
+        true,
+        true
+      ],
+      "readouts": {
+        "risk": {
+          "text": "auth · session lifetime · 3 dependents",
+          "state": "pending"
+        },
+        "gate": null
+      },
+      "slots": [
+        "refresh rotation services/auth/refresh.py",
+        "admin console services/admin/console.py",
+        "session cache infra/cache/session_cache.py"
+      ]
+    },
+    "06-gate-caption": {
+      "current": "gate",
+      "nodes": {
+        "session": {
+          "state": "visited",
+          "resolved": null
+        },
+        "intake": {
+          "state": "visited",
+          "resolved": null
+        },
+        "parse": {
+          "state": "visited",
+          "resolved": null
+        },
+        "graph": {
+          "state": "visited",
+          "resolved": null
+        },
+        "risk": {
+          "state": "visited",
+          "resolved": "pending"
+        },
+        "gate": {
+          "state": "active",
+          "resolved": "pending"
+        },
+        "question": {
+          "state": "idle",
+          "resolved": null
+        },
+        "human": {
+          "state": "idle",
+          "resolved": null
+        },
+        "judge": {
+          "state": "idle",
+          "resolved": null
+        },
+        "ledger": {
+          "state": "idle",
+          "resolved": null
+        }
+      },
+      "edges": {
+        "session>intake": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "intake>parse": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "parse>graph": {
+          "fired": true,
+          "settle": "visited"
+        },
+        "graph>risk": {
+          "fired": true,
+          "settle": "pending"
+        },
+        "risk>gate": {
+          "fired": true,
+          "settle": "pending"
+        },
+        "risk>ledger": {
+          "fired": false,
+          "settle": null
+        },
+        "gate>question": {
+          "fired": false,
+          "settle": null
+        },
+        "question>human": {
+          "fired": false,
+          "settle": null
+        },
+        "human>judge": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>question": {
+          "fired": false,
+          "settle": null
+        },
+        "judge>ledger": {
+          "fired": false,
+          "settle": null
+        }
+      },
+      "dependents": [
+        true,
+        true,
+        true
+      ],
+      "readouts": {
+        "risk": {
+          "text": "auth · session lifetime · 3 dependents",
+          "state": "pending"
+        },
+        "gate": {
+          "text": "blast radius 3 → depth 3",
+          "state": "pending"
+        }
+      },
+      "slots": [
+        "refresh rotation services/auth/refresh.py",
+        "admin console services/admin/console.py",
+        "session cache infra/cache/session_cache.py"
+      ]
+    }
+  }
+}
