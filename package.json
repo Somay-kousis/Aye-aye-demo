@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "node daemon/index.js",
     "tail": "node scripts/tail.js",
+    "stills": "node scripts/stills.js",
+    "check-tokens": "node scripts/check-tokens.js",
     "reset-sample": "sh scripts/reset-sample.sh"
   },
   "dependencies": {
