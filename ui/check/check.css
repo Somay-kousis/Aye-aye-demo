@@ -1,0 +1,221 @@
+/* The check pane. Six regions, each shown only with content, separated by hairline rules.
+   Every transition is an entrance triggered by a daemon event; nothing loops. */
+
+#check-body {
+  margin-top: var(--pad);
+  transition: opacity var(--d-base) var(--ease);
+}
+
+#check-body.clearing {
+  opacity: 0;
+}
+
+.region {
+  display: none;
+}
+
+.region.shown {
+  display: block;
+}
+
+.region.shown ~ .region.shown {
+  margin-top: var(--pad);
+  padding-top: var(--pad);
+  border-top: var(--hairline) solid var(--border);
+}
+
+/* entrances: opacity only, --d-fast, with per-element delays set inline by the modules */
+
+.h-label, .h-path, .h-meta,
+.diff-row,
+.question,
+.transcript,
+.concept, .concept .detail, .concept .emphasis,
+.verdict-headline, .verdict-sub {
+  opacity: 0;
+  transition: opacity var(--d-fast) var(--ease);
+}
+
+.h-label.shown, .h-path.shown, .h-meta.shown,
+.diff-row.shown,
+.question.shown,
+.transcript.shown,
+.concept.shown, .concept .detail.shown, .concept .emphasis.shown,
+.verdict-headline.shown, .verdict-sub.shown {
+  opacity: 1;
+}
+
+/* header: label, path, metadata. The assignee's name is the one --text in the block. */
+
+.h-label {
+  font-family: var(--ui);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.h-path {
+  margin-top: var(--gap);
+  font-family: var(--mono);
+  font-size: var(--t-body);
+  color: var(--text);
+}
+
+.h-meta {
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--ui);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+.h-name {
+  color: var(--text);
+}
+
+/* diff: the real removed and added lines, tinted */
+
+.diff-row {
+  padding: calc(var(--gap) / 4) calc(var(--gap) / 2);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  white-space: pre;
+  border-radius: var(--radius);
+}
+
+.diff-row.removed {
+  color: var(--fail);
+  background: color-mix(in srgb, var(--fail) var(--tint), transparent);
+}
+
+.diff-row.added {
+  color: var(--pass);
+  background: color-mix(in srgb, var(--pass) var(--tint), transparent);
+}
+
+/* question: the only text with room to breathe */
+
+.question {
+  font-family: var(--ui);
+  font-size: var(--t-read);
+  line-height: var(--leading-read);
+  color: var(--text);
+}
+
+.question code,
+.concept code {
+  font-family: var(--mono);
+  font-size: 0.94em;
+}
+
+/* answer: the transcript, capped and clipped from the top; the listener sits apart in the
+   pane's lower third */
+
+.transcript-clip {
+  max-height: calc(var(--t-read) * var(--leading-read) * 8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.transcript {
+  font-family: var(--ui);
+  font-size: var(--t-read);
+  line-height: var(--leading-read);
+  color: var(--text-dim);
+  transition: opacity var(--d-fast) var(--ease), color var(--d-lock) var(--ease);
+}
+
+.transcript.locked {
+  color: var(--text);
+}
+
+/* the listener: centred in the lower third, only while a question is live */
+.spectrum {
+  position: absolute;
+  left: calc((var(--pane-right) - var(--spectrum)) / 2);
+  top: calc(var(--stage-h) * 2 / 3 + (var(--stage-h) / 3 - var(--pad) - var(--spectrum)) / 2);
+  width: var(--spectrum);
+  height: var(--spectrum);
+  pointer-events: none;
+}
+
+/* concept rows. A row lands --d-fast after its concept event, once its evaluator on the
+   left has resolved. */
+
+.concept {
+  display: grid;
+  grid-template-columns: var(--glyph) 1fr;
+  column-gap: var(--gap);
+  transition-delay: var(--d-fast);
+}
+
+.concept + .concept {
+  margin-top: var(--pad);
+}
+
+.concept .mark {
+  font-family: var(--ui);
+  font-size: var(--glyph);
+  line-height: calc(var(--t-body) * 1.35);
+  text-align: center;
+  transition: color var(--d-fast) var(--ease);
+}
+
+.concept[data-result="pass"] .mark { color: var(--pass); }
+.concept[data-result="fail"] .mark { color: var(--fail); }
+
+.concept-name {
+  font-family: var(--ui);
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.concept .detail {
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--ui);
+  font-size: var(--t-body);
+  color: var(--text-dim);
+  transition-delay: calc(var(--d-fast) + var(--d-detail));
+}
+
+/* the emphasis sentence: --text, its own line, nothing else */
+.concept .emphasis {
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--ui);
+  font-size: var(--t-body);
+  color: var(--text);
+  transition-delay: calc(var(--d-fast) + var(--d-detail));
+}
+
+/* verdict */
+
+.verdict-headline {
+  font-family: var(--ui);
+  font-size: var(--t-read);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.verdict-headline .score[data-state="pass"] { color: var(--pass); }
+.verdict-headline .score[data-state="fail"] { color: var(--fail); }
+
+.verdict-sub {
+  margin-top: calc(var(--gap) / 2);
+  font-family: var(--ui);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+/* permanent, never animated */
+.verdict-footer {
+  margin-top: var(--gap);
+  font-family: var(--ui);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}

@@ -3,9 +3,9 @@
 :root {
   /* surfaces */
   --canvas:        #0A0C0E;
-  --surface:       #14181C;
+  --surface:       #181D22;
   --surface-raised:#1B2126;
-  --border:        #242B31;
+  --border:        #2F383F;
   --border-strong: #38424A;
 
   /* text */
@@ -15,6 +15,7 @@
 
   /* state */
   --idle:          #4A555D;
+  --idle-routed:   #343D45;   /* the skip and retry paths at rest, quieter than flow */
   --active:        #6BA8FF;   /* currently executing */
   --visited:       #38424A;   /* traversed and moved on from; resolved colours override it */
   --pass:          #45D48A;
@@ -50,12 +51,17 @@
   --readout-gap: 6px;    /* card bottom to readout caption */
   --port:        3px;
   --glyph:       12px;   /* concept row mark */
-  --meter-w:     24px;
-  --meter-bar:   2px;
+  --spectrum:    260px;  /* the listener canvas, square */
+  --evaluator-w: 48px;   /* judge fan-out cards; three with --gap fit one --node-w cell */
   --hairline:    1px;
   --nudge:       4px;    /* the most anything may translate */
   --dash:        2 3;    /* blast-radius edge dash pattern */
   --tint:        15%;    /* diff row background */
+
+  /* codebase layer: the substrate beneath the control plane, opacities at rest and lit */
+  --codebase-dot:   0.25;
+  --codebase-edge:  0.08;
+  --codebase-focus: 0.6;
 
   /* motion */
   --d-fast:    140ms;
@@ -67,5 +73,6 @@
   --d-detail:  200ms;   /* mark to detail line */
   --d-ledger:  1200ms;  /* new ledger row border settling */
   --d-silence: 1500ms;  /* silence before the transcript locks */
+  --d-lock:    390ms;   /* the listener contracting into the locked transcript */
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
 }

@@ -92,7 +92,7 @@ body {
   color: var(--text-faint);
 }
 
-/* ARMED slot. Empty until phase 4 fills it; renders nothing while empty. */
+/* ARMED suffix. Filled once TTS and the microphone have both answered; nothing while empty. */
 .armed:empty {
   display: none;
 }
