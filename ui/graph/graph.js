@@ -4,6 +4,9 @@ import {
   readTokens, cardRect, slotRect, portAt, sidesFor, edgePath, dependentPath,
   portSquare, arrowPoints,
 } from './layout.js';
+import { createCodebase } from './codebase.js';
+import { createEvaluators } from './evaluators.js';
+import { createTelemetry } from './telemetry.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const READOUT_NODES = ['risk', 'gate'];
@@ -19,6 +22,9 @@ export function createGraph(container) {
   const slots = [];
   const depEdges = [];
   let current = null;
+
+  // the codebase substrate goes in first so everything else draws over it
+  const codebase = createCodebase(container, t);
 
   // cards first, so their rendered height can place the ports
   for (const node of NODES) {
@@ -78,6 +84,7 @@ export function createGraph(container) {
     const b = portAt(to.rect, sideB, t);
     const d = edgePath(edge, a, b);
     const g = el('g', { class: 'edge', 'data-edge': `${edge.from}>${edge.to}` });
+    if (edge.route) g.dataset.route = edge.route;
     g.appendChild(el('path', { class: 'base', d }));
     g.appendChild(el('path', { class: 'fire', d, pathLength: '1' }));
     g.appendChild(rect(portSquare(a, t), 'port from'));
@@ -104,6 +111,9 @@ export function createGraph(container) {
     depEdges.push({ el: g });
   }
   container.appendChild(svg);
+
+  const evaluators = createEvaluators(container, svg, nodes, cardH, t);
+  const telemetry = createTelemetry(container, nodes, t);
 
   function el(tag, attrs) {
     const node = document.createElementNS(SVG, tag);
@@ -157,6 +167,9 @@ export function createGraph(container) {
       afterEdge(s.el, false);
       s.el.classList.remove('shown');
     }
+    codebase.reset();
+    evaluators.remove();
+    telemetry.clear();
     current = null;
   }
 
@@ -172,10 +185,14 @@ export function createGraph(container) {
       if (!prev.el.dataset.resolved) settleInto(current, 'visited');
     }
     afterEdge(node.el, Boolean(edge));
+    delete node.el.dataset.resolved; // judge is re-entered on the retry and resolves again
     node.el.dataset.state = 'active';
     node.activatedAt = performance.now() + (edge ? t.dEdge : 0);
     if (edge) fire(edge.el);
     current = id;
+    if (id === 'parse') codebase.ripple({ x: node.rect.x + node.rect.w / 2, y: node.rect.y + node.rect.h / 2 });
+    if (id === 'graph') codebase.focus();
+    if (id === 'question') evaluators.clear();
   }
 
   function onResolve({ id, state, readout }) {
@@ -195,10 +212,11 @@ export function createGraph(container) {
     }
   }
 
-  function onDependent({ index, path, label }) {
+  function onDependent({ index, path, label, weight }) {
     const slot = slots[index - 1];
     const edge = depEdges[index - 1];
     if (!slot || !edge) return;
+    codebase.travel(index, path, weight);
     slot.el.querySelector('.dep-label').textContent = label;
     slot.el.querySelector('.dep-path').textContent = path;
     afterEdge(slot.el, true);
@@ -212,6 +230,10 @@ export function createGraph(container) {
       case 'node': onNode(event.id); break;
       case 'dependent': onDependent(event); break;
       case 'resolve': onResolve(event); break;
+      case 'verdict': onResolve({ id: 'judge', state: event.passed ? 'pass' : 'fail' }); break;
+      case 'answer': evaluators.spawn(event.concepts ?? []); break;
+      case 'concept': evaluators.resolve(event.index, event.result); break;
+      case 'telemetry': telemetry.show(event); break;
       case 'reset': reset(); break;
       default: break;
     }
@@ -226,8 +248,11 @@ export function createGraph(container) {
       dependents: depEdges.map((g) => g.el.classList.contains('fired')),
       readouts: Object.fromEntries([...readouts].map(([id, r]) => [id, r.classList.contains('shown') ? { text: r.textContent, state: r.dataset.state } : null])),
       slots: slots.map((s) => (s.el.classList.contains('shown') ? s.el.querySelector('.dep-label').textContent + ' ' + s.el.querySelector('.dep-path').textContent : null)),
+      codebase: codebase.snapshot(),
+      evaluators: evaluators.snapshot(),
+      telemetry: telemetry.snapshot(),
     };
   }
 
-  return { applyEvent, reset, snapshot };
+  return { applyEvent, reset, snapshot, perf: () => ({ codebase: codebase.perf() }) };
 }

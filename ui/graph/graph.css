@@ -6,6 +6,14 @@
   inset: 0;
 }
 
+/* the codebase substrate: one canvas beneath everything, static between events */
+
+.codebase {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 /* node card */
 
 .node {
@@ -132,6 +140,11 @@
   stroke-width: var(--hairline);
 }
 
+/* the routed edges are the failure and skip paths: quieter at rest, full weight when fired */
+.edge[data-route] .base {
+  stroke: var(--idle-routed);
+}
+
 /* The fire path draws source to target with stroke-dashoffset (pathLength is 1). Dormant
    it is invisible; a reset fades it over --d-base and only then snaps the offset back, so
    nothing is seen retracting. */
@@ -227,3 +240,73 @@
   stroke-dashoffset: 0;
   transition: stroke-dashoffset var(--d-edge) var(--ease);
 }
+
+/* judge fan-out: numbered evaluator cards above judge, stubs up, returns down */
+
+.evaluator {
+  position: absolute;
+  width: var(--evaluator-w);
+  box-sizing: border-box;
+  padding: var(--gap);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  background: var(--surface);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease), opacity var(--d-base) var(--ease);
+  transition-delay: var(--after-edge, 0ms);
+}
+
+.evaluator[data-state="active"] {
+  border-color: var(--active);
+  color: var(--text);
+}
+
+.evaluator[data-resolved="pass"] { border-color: var(--pass); }
+.evaluator[data-resolved="fail"] { border-color: var(--fail); }
+
+.evaluator.clearing,
+.eval-edge.clearing {
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease);
+  transition-delay: 0ms;
+}
+
+.eval-edge .return {
+  fill: none;
+  stroke: var(--active);
+  stroke-width: var(--hairline);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.eval-edge.returned .return {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--d-edge) var(--ease), opacity 0ms;
+}
+
+.eval-edge.returned[data-settle="pass"] .return { stroke: var(--pass); }
+.eval-edge.returned[data-settle="fail"] .return { stroke: var(--fail); }
+
+/* telemetry: staged captions under four nodes, quieter than a readout */
+
+.telemetry {
+  position: absolute;
+  padding-top: var(--readout-gap);
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  color: var(--text-faint);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--d-fast) var(--ease);
+}
+
+.telemetry span {
+  display: block;
+}
+
+.telemetry.shown { opacity: 1; }

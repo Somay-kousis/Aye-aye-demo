@@ -12,11 +12,11 @@ export const EDGES = [
   { from: 'parse',    to: 'graph' },
   { from: 'graph',    to: 'risk' },
   { from: 'risk',     to: 'gate' },
-  { from: 'risk',     to: 'ledger',   route: 'below', lead: 40, cp: 110 },   // the skip path
+  { from: 'risk',     to: 'ledger',   route: 'below', lead: 40, cp: 72 },   // the skip path
   { from: 'gate',     to: 'question' },
   { from: 'question', to: 'human' },
   { from: 'human',    to: 'judge' },
-  { from: 'judge',    to: 'question', route: 'above', lead: 336, cp: 72 },   // the retry loop
+  { from: 'judge',    to: 'question', route: 'above', lead: 256, cp: 56 },   // the retry loop
   { from: 'judge',    to: 'ledger' },
 ];
 

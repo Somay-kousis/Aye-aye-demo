@@ -3,13 +3,13 @@
 
 // Authored px inside the architecture pane. Tune these to move whole rows or the band.
 export const GRID = {
-  rowTop: 288,    // top edge of row 0 cards
-  rowPitch: 248,  // row 0 top to row 1 top; leaves room for a readout beneath row 0
-  bandTop: 872,   // top edge of the dependents band
+  rowTop: 340,    // top edge of row 0 cards
+  rowPitch: 186,  // row 0 top to row 1 top; leaves room for a readout beneath row 0
+  bandTop: 740,   // top edge of the dependents band
 };
 
 // Dashed dependent edges bow this far from their endpoints.
-export const DEPENDENT_CP = 120;
+export const DEPENDENT_CP = 60;
 
 export function readTokens() {
   const style = getComputedStyle(document.documentElement);
@@ -22,7 +22,13 @@ export function readTokens() {
     port: px('--port'),
     paneLeft: px('--pane-left'),
     stageH: px('--stage-h'),
+    hairline: px('--hairline'),
+    nudge: px('--nudge'),
+    evaluatorW: px('--evaluator-w'),
     dEdge: ms('--d-edge'),
+    dHold: ms('--d-hold'),
+    dBase: ms('--d-base'),
+    dFast: ms('--d-fast'),
   };
 }
 
