@@ -56,7 +56,8 @@ function summary(e) {
   switch (e.type) {
     case 'change': return `${e.path} ${e.stakes} symbol=${e.symbol} -${e.diff.removed.length} +${e.diff.added.length}`;
     case 'node': return e.id;
-    case 'dependent': return `${e.index} ${e.path} (${e.label})`;
+    case 'dependent': return `${e.index} ${e.path} (${e.label}) w${e.weight}`;
+    case 'telemetry': return `${e.id} ${e.ms}ms ${e.tokens}tok${e.model ? ` ${e.model}` : ''}`;
     case 'resolve': return `${e.id} ${e.state}${e.readout ? `  "${e.readout}"` : ''}`;
     case 'skip':
     case 'check': return e.lines.join(' | ');

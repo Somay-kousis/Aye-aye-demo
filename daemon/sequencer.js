@@ -2,7 +2,7 @@ import { classify, domainOf } from './riskResolution.js';
 import { detectSymbol } from './blastRadius.js';
 import { depthFor, gateReadout } from './escalationLadder.js';
 import { durationValues, fill } from './interpolation.js';
-import { SCENARIOS, SKIPS, LEDGER_FIXTURE, PERSON, VERDICT_FOOTER } from './scenarios/index.js';
+import { SCENARIOS, SKIPS, LEDGER_FIXTURE, PERSON, VERDICT_FOOTER, TELEMETRY } from './scenarios/index.js';
 
 const TRAVERSAL = ['session', 'intake', 'parse', 'graph'];
 
@@ -26,13 +26,25 @@ export class Sequencer {
     this.values = null;
     this.attempt = 0;
     this.awaiting = null;
+    this.current = null;
     if (announce) this.emit('reset', {});
   }
 
   emit(type, payload) {
+    if (type === 'node') this.leave(payload.id);
     const event = { type, t: Date.now() - this.started, ...payload };
     this.broadcast(event);
     this.log(event);
+  }
+
+  // Telemetry goes out when a node is left, i.e. as the next node lights. Only the nodes in
+  // TELEMETRY report; the rows are staged (see scenarios/index.js).
+  leave(next) {
+    const id = this.current;
+    this.current = next;
+    if (!id) return;
+    const row = TELEMETRY[id];
+    if (row) this.emit('telemetry', { id, ...row });
   }
 
   sleep(ms) {
@@ -57,6 +69,7 @@ export class Sequencer {
     const dependents = detected?.dependents ?? [];
     const domain = domainOf(path);
 
+    this.current = null;
     this.emit('change', { path, stakes, symbol: detected?.symbol ?? null, diff });
     if (!(await this.sleep(this.d['d-base']))) return;
 
@@ -67,7 +80,7 @@ export class Sequencer {
 
     if (stakes === 'risk-bearing') {
       for (const [i, dep] of dependents.entries()) {
-        this.emit('dependent', { index: i + 1, path: dep.path, label: dep.label });
+        this.emit('dependent', { index: i + 1, path: dep.path, label: dep.label, weight: dep.weight });
         if (!(await this.sleep(this.d['d-hold']))) return;
       }
     }
@@ -119,7 +132,11 @@ export class Sequencer {
     const attempt = this.scenario.attempts[this.attempt];
     this.emit('node', { id: 'question' });
     if (!(await this.sleep(this.d['d-hold']))) return;
-    this.emit('question', { attempt: this.attempt + 1, text: fill(attempt.question, this.values) });
+    this.emit('question', {
+      attempt: this.attempt + 1,
+      text: fill(attempt.question, this.values),
+      spoken: attempt.spoken ? fill(attempt.spoken, this.values) : null,
+    });
     this.emit('node', { id: 'human' });
     this.awaiting = 'answer';
   }
@@ -129,7 +146,11 @@ export class Sequencer {
     this.awaiting = null;
     const attempt = this.scenario.attempts[this.attempt];
 
-    this.emit('answer', { attempt: this.attempt + 1, transcript });
+    this.emit('answer', {
+      attempt: this.attempt + 1,
+      transcript,
+      concepts: attempt.concepts.map((c) => ({ index: c.index, name: c.name })),
+    });
     this.emit('node', { id: 'judge' });
     if (!(await this.sleep(this.d['d-hold']))) return;
 

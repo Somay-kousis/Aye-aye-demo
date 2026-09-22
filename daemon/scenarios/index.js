@@ -50,6 +50,8 @@ export const SCENARIOS = {
       },
       {
         question: 'Where else does `SESSION_TTL` get read, and what evicts the cached copy?',
+        // TTS reads the identifier badly; `spoken` is what Aye-aye says, `question` what it shows.
+        spoken: 'Where else does the session TTL get read, and what evicts the cached copy?',
         concepts: [
           {
             index: 2,
@@ -79,6 +81,19 @@ export const SKIPS = {
     'Copy change. No auth, payments or data path touched.',
     'Recorded. Nobody interrupted.',
   ],
+};
+
+// Node telemetry, STAGED: what each stage reports having spent, shown as a caption under
+// four nodes. Internally consistent, not measured: parse tokenises the file, graph walks a
+// smaller structure, the two model-backed stages carry the model. The model name is a
+// placeholder for the demo; the real architecture is bring-your-own-model.
+export const MODEL = 'claude-sonnet-5';
+
+export const TELEMETRY = {
+  parse:    { ms: 640,  tokens: 4200 },
+  graph:    { ms: 910,  tokens: 1100 },
+  question: { ms: 2800, tokens: 3800, model: MODEL },
+  judge:    { ms: 3100, tokens: 5600, model: MODEL },
 };
 
 // Prior ledger entries. Literal fixtures; the two new rows take the wall clock.
