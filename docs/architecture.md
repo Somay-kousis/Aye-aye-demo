@@ -131,6 +131,46 @@ path there is no surface: `notifications · 0 dependents`.
 **`gate`** renders `blast radius <n> → depth <d>`, where depth comes from the escalation
 ladder below. Example: `blast radius 3 → depth 3`.
 
+## The codebase layer (staged)
+
+Beneath the control plane the architecture pane renders the codebase itself as a graph:
+about 180 file nodes as dots and their import edges as hairlines, on one canvas, at low
+opacity. **This layer is staged.** Every dot but four is invented and carries no label; the
+layout is generated from a fixed seed (`ui/graph/codebase.js`) so it is identical on every
+take. The four real nodes are the changed file and its three dependents from the blast-radius
+map, pinned by path inside one cluster just beneath the dependents band.
+
+It moves only on events. On `parse` an activation front ripples outward from the parse card
+across the whole pane and decays. On `graph` the changed file's neighbourhood (its graph
+neighbours to depth two, at most fifteen) brightens and stays. On each `dependent` event a
+copy of that dependent's dot rises out of the neighbourhood into its slot in the band, its
+import edge stretching with it, so the three dependents visibly come from somewhere.
+
+**Edge weight** has one meaning: *the number of symbols the importing file uses from the
+imported file*. It renders as thickness (weights 1, 2, 3 → one, one and a half, two
+hairlines) and, on the three real edges once they have risen, as a `w n` label. The three
+real values are read off the import lines in `sample-repo/` and live in
+`daemon/blastRadius.js`: `refresh.py` 3, `console.py` 2, `session_cache.py` 1.
+
+## Judge fan-out
+
+On `answer`, `judge` spawns one small evaluator card per concept in the empty cell above it,
+numbered `01`, `02`, `03` to match the concept rows in the check pane, each fed by a stub
+that draws up from judge. Running is the card lit `--active` and nothing else: no pulse. On
+each `concept` event the matching card resolves to its result and a return line draws back
+down to judge; the concept row on the right lands `--d-fast` later, so the left pane is
+visibly doing the work the right pane reports. The evaluators clear when the question is
+re-asked. The `answer` event carries the concept list for this purpose.
+
+## Node telemetry (staged)
+
+Four nodes — `parse`, `graph`, `question`, `judge` — carry a caption of what the stage
+reports having spent: elapsed time and tokens, and for the two model-backed stages the
+model. The values are a fixed table in `daemon/scenarios/index.js`, emitted as `telemetry`
+events when the node is left. They are internally consistent, not measured. The model name
+is a real, currently shipping model so the string survives an engineer leaning in, and it is
+staged: the real architecture is bring-your-own-model.
+
 ## Escalation ladder
 
 Depth is the number of concepts the answer must cover, and it scales with reach. This is a

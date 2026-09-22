@@ -18,9 +18,9 @@ values from `ui/tokens.css` at startup to pace its event sequence.
 :root {
   /* surfaces */
   --canvas:        #0A0C0E;
-  --surface:       #14181C;
+  --surface:       #181D22;
   --surface-raised:#1B2126;
-  --border:        #242B31;
+  --border:        #2F383F;
   --border-strong: #38424A;
 
   /* text */
@@ -30,6 +30,7 @@ values from `ui/tokens.css` at startup to pace its event sequence.
 
   /* state */
   --idle:          #4A555D;
+  --idle-routed:   #343D45;   /* the skip and retry paths at rest, quieter than flow */
   --active:        #6BA8FF;   /* currently executing */
   --visited:       #38424A;   /* traversed and moved on from; resolved colours override it */
   --pass:          #45D48A;
@@ -60,12 +61,17 @@ values from `ui/tokens.css` at startup to pace its event sequence.
   --readout-gap: 6px;    /* card bottom to readout caption */
   --port:        3px;
   --glyph:       12px;   /* concept row mark */
-  --meter-w:     24px;
-  --meter-bar:   2px;
+  --spectrum:    260px;  /* the listener canvas, square */
+  --evaluator-w: 48px;   /* judge fan-out cards; three with --gap fit one --node-w cell */
   --hairline:    1px;
   --nudge:       4px;    /* the most anything may translate */
   --dash:        2 3;    /* blast-radius edge dash pattern */
   --tint:        15%;    /* diff row background */
+
+  /* codebase layer: the substrate beneath the control plane, opacities at rest and lit */
+  --codebase-dot:   0.25;
+  --codebase-edge:  0.08;
+  --codebase-focus: 0.6;
 
   /* motion */
   --d-fast:    140ms;
@@ -77,6 +83,7 @@ values from `ui/tokens.css` at startup to pace its event sequence.
   --d-detail:  200ms;   /* mark to detail line */
   --d-ledger:  1200ms;  /* new ledger row border settling */
   --d-silence: 1500ms;  /* silence before the transcript locks */
+  --d-lock:    390ms;   /* the listener contracting into the locked transcript */
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 ```
@@ -101,10 +108,12 @@ Fixed 1920×1080. Never scrolls.
 One window, two panes. Both animate in from the centre line on first event, over
 `--d-base`. They do not pop; they resolve.
 
-The CHECK section label carries an **ARMED** suffix once the page has had its first keypress
-and TTS and the microphone are live. Chrome blocks both until a user gesture; the suffix
-makes it visible before a take starts that the gesture happened. `CHECK · ARMED`, same
-`--t-micro`, `--text-faint`.
+The CHECK section label carries an **ARMED** suffix once TTS and the microphone have both
+answered. Chrome blocks both until a user gesture, so the first keydown of any key arms them;
+the suffix appears only when both succeeded, so it is visible before a take starts that the
+take will have audio. In replay mode Space also starts the run, so press any other key
+first, look for `CHECK · ARMED`, then Space. Same `--t-micro`, `--text-faint`. The chosen
+TTS voice is picked from a named preference list and logged to the console at arm time.
 
 ## Node card
 
@@ -165,13 +174,30 @@ Four stacked regions, each appearing only when it has content, each separated by
 `--hairline` `--border` rule. On the second attempt the question and answer regions replace
 their content in place; concept rows persist and update:
 
-1. **Header.** Section label in `--t-micro` uppercase, then the file path in `--mono`.
+1. **Header.** Four lines, as the script gives them: the section label in `--t-micro`
+   uppercase `--text-dim`; the path in `--mono` `--t-body` `--text`; `Touches:` and
+   `Assigned to:` in `--t-small` `--text-dim`. On the last line the name renders `--text`:
+   it is the one thing in the header carrying full weight, a named human on the hook. Lines
+   land `--d-fast` apart. The same component renders beat 1's `NO CHECK REQUIRED` lines.
 2. **Diff.** `--mono`, `--t-small`. Removed line `--fail` at `--tint` background, added line
-   `--pass` at `--tint`. No line numbers, no syntax highlighting beyond that.
+   `--pass` at `--tint`. Only the changed lines: no line numbers, no path comment, no blank
+   line, no syntax highlighting beyond that. It arrives with the header, not with the change.
 3. **Question.** `--t-read`, `--ui`, `--text`. Generous leading, `--leading-read`. This is the
-   only place in the UI that gets room to breathe.
-4. **Answer.** Live transcript in `--t-read` `--text-dim` while speaking, locking to
-   `--text` after `--d-silence` of silence, or on Space. Then the concept rows.
+   only place in the UI that gets room to breathe. Backticked identifiers render `--mono`.
+   Aye-aye speaks the question's `spoken` form when the scenario gives one, else the text
+   with the backticks stripped.
+4. **Answer.** The mic stream and the listener go live with the question, so the rings move
+   while Aye-aye speaks; recognition starts only when the utterance ends (or after a
+   length-derived timeout if TTS never answers), so the take never transcribes its own voice.
+   Live transcript in `--t-read` `--text-dim`, locking to `--text` after `--d-silence` of
+   silence, or on Space. Silence is measured two ways at once: the clock restarts on every
+   recognition result and only counts down while the mic's RMS is under threshold. If
+   Chrome ends recognition with `no-speech` before a result, it is restarted. The text is
+   capped at eight lines and clips from the top. Then the concept rows, each landing
+   `--d-fast` after its evaluator on the left resolves.
+5. **Verdict.** Headline `--t-read` 500 `--text`, with the score (`1 of 3`, `3 of 3`) in the
+   state colour, `--fail` or `--pass`. Sub line `--t-small` `--text-dim`. Beneath, the footer
+   in `--t-micro` uppercase `--text-faint`, created once and never animated or re-rendered.
 
 ## Concept row
 
@@ -183,17 +209,49 @@ their content in place; concept rows persist and update:
      The cached session in session_cache.py derives its own TTL...
 ```
 
-Mark is a `--glyph` glyph in `--pass` or `--fail`. Rows reveal one at a time, `--d-concept`
-apart, each on its own daemon event. The detail line fades in `--d-detail` after its mark. Do not reveal all three at once; the
-sequence is what makes it feel like judgement rather than a lookup.
+Mark is a `--glyph` glyph in `--pass` or `--fail`. Name `--t-body` 500 `--text`, detail line
+`--t-body` `--text-dim`. Rows reveal one at a time, `--d-concept` apart, each on its own
+daemon event. The detail line fades in `--d-detail` after its mark. Do not reveal all three
+at once; the sequence is what makes it feel like judgement rather than a lookup. A second
+event for an index updates that row in place: the mark flips, the detail line is replaced,
+and an emphasis line the new event lacks goes. The emphasis line itself is `--t-body`
+`--text` on its own line, with no mark, colour or label.
 
-## Voice indicator
+## Listener
 
-A 5-bar amplitude meter, `--meter-bar` bars, `--active`, driven by real microphone input.
-`--meter-w` wide, sits inline before the transcript. When not listening it is five flat
-`--hairline` lines in `--idle`.
+One listening indicator, and it is large: a `--spectrum` square canvas centred in the check
+pane's lower third, which is empty at every frame. It exists only while a question is live.
 
-No microphone icon. No circle. No waveform sweep.
+Concentric arcs driven by the mic's frequency data: 48 log-spaced bins from 80 Hz to 8 kHz,
+each a `--hairline` ring in `--active` whose radius and opacity follow its eased magnitude.
+A fixed ring at the centre never moves. Smoothing is the analyser's constant plus per-bin
+attack and release, so it reads as an instrument, not a nerve.
+
+Three states. Armed but silent: every ring collapsed onto the centre, one thin circle, drawn
+once. Listening: rings breathing outward with the voice; the canvas redraws only while the
+mic stream is attached. Lock: over `--d-lock` the rings contract, the drawing rises a short
+way and fades, in step with the transcript going from `--text-dim` to `--text`. The voice
+becomes the record. Then the canvas is gone.
+
+Single colour, `--active`. No gradient, no glow, no bloom.
+
+## Evaluator card
+
+```
+  ┌────┐ ┌────┐ ┌────┐
+  │ 01 │ │ 02 │ │ 03 │      --evaluator-w wide, --gap apart, --t-micro --mono
+  └────┘ └────┘ └────┘
+```
+
+Above `judge`, in the empty cell. `--surface`, `--border`, `--radius`. Running: border
+`--active`, label `--text`. Resolved: border `--pass` or `--fail`, and a return line in the
+same colour draws back to judge beside the stub. Fades out over `--d-base` on the retry.
+
+## Telemetry caption
+
+Beneath `parse`, `graph`, `question` and `judge` once visited: `--t-micro` `--mono`
+`--text-faint`, one line of `0.6s · 4.2k tok`, the model on a second line where there is one.
+Quieter than a readout on purpose: the two readouts carry meaning, this is texture.
 
 ## Ledger
 

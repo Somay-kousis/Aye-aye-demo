@@ -75,7 +75,9 @@ These get added by pattern-matching and all of them damage the demo:
 
 - Login, signup, settings, onboarding, or any account UI
 - Fake company logos, "trusted by" rows, testimonials, avatars of invented people
-- Invented metrics, counts, percentages or dollar figures anywhere on screen
+- Invented traction metrics — user counts, adoption percentages, revenue, "trusted by"
+  figures. System telemetry describing the demo's own operation is permitted and documented
+  as staged in docs/architecture.md.
 - Toasts, modals, tooltips, confetti, sound effects
 - Purple gradients, glassmorphism, glow, blur effects
 - A chat interface. Aye-aye is not a chatbot.

@@ -197,6 +197,10 @@ are; rows 2 and 3 flip from fail to pass. Nothing stacks and nothing scrolls.
 
 > Where else does `SESSION_TTL` get read, and what evicts the cached copy?
 
+Spoken form (TTS reads the identifier badly; the display text is unchanged):
+
+> Where else does the session TTL get read, and what evicts the cached copy?
+
 **What you say:**
 
 > Right — `refresh.py` and the admin console both import it, and the cache sets
